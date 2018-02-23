@@ -1,0 +1,5 @@
+# Bluetooth serial module connected to UART_1
+#
+syscfg.vals:
+  UART_0 : 0
+  UART_1 : 1

@@ -1,0 +1,12 @@
+pkg.name: apps/rfcomm
+pkg.type: app
+pkg.description: Basic example of rfcomm communication with Android.
+pkg.author: "Markus Lampert"
+pkg.homepage: "http://www.vancouverroboticsclub.org/"
+pkg.keywords:
+
+pkg.deps:
+    - "@apache-mynewt-core/kernel/os"
+    - "@apache-mynewt-core/hw/hal"
+    - "@apache-mynewt-core/hw/drivers/uart"
+    - "@apache-mynewt-core/sys/console/stub"

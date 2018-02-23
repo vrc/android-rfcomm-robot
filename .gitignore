@@ -53,3 +53,17 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
+
+# Apache-Mynewt
+newt/project.state
+newt/project.yml
+newt/repos
+newt/targets
+
+# Android Studio
+android/.gitignore
+android/.idea
+android/app/.gitignore
+android/app/build
+android/app/src/androidTest
+android/app/src/test
