@@ -1,20 +1,16 @@
-#include "commands.h"
 #include "events.h"
 #include "heartbeat.h"
 #include "uart.h"
 
-#include "bsp/bsp.h"
-#include "hal/hal_gpio.h"
-#include "os/os.h"
-#include "sysinit/sysinit.h"
+#define LED_PIN 7 // builtin LED for the Adafruit ATmega32U4 Breakout Board
 
 static unsigned err = 0;
 
-static void monitor(struct os_event *event) {
+void monitor(void *event) {
   static unsigned state = 0;
   static unsigned edisp = 0;
-
-  if (EVENT_RX_TIMEOUT == event->ev_arg) {
+  
+  if (EVENT_RX_TIMEOUT == event) {
     err = uartRxError();
     if (!err) {
       err = uartRxCount();
@@ -27,14 +23,14 @@ static void monitor(struct os_event *event) {
       // use the HB LED to blink the error code
       // if err > 7 all you'll see is a 2Hz blinking of the LED,
       // but then, most ppl get bored after counting to 3 ....
-      os_callout_reset(&hbTimer, OS_TICKS_PER_SEC / 4);
+      timerSet(hbTimer, 250);
       if (0 == (state & 0x01) && (state/2) < err) {
-          hal_gpio_write(LED_BLINK_PIN, 1);
+        digitalWrite(LED_PIN, 1);
       } else {
-          hal_gpio_write(LED_BLINK_PIN, 0);
+        digitalWrite(LED_PIN, 0);
       }
     } else {
-      heartbeat(state, LED_BLINK_PIN);
+      heartbeat(state, LED_PIN);
     }
 
     if (++state > 15) {
@@ -49,22 +45,27 @@ static void monitor(struct os_event *event) {
   }
 }
 
-static void monitorInit() {
-  hal_gpio_init_out(LED_BLINK_PIN, 1);
+void monitorInit() {
+  pinMode(LED_PIN, OUTPUT);
 }
 
-int main(int argc, char **argv) {
-  sysinit();
-
+void setup() {
   monitorInit();
-  uartInit(monitor);
-  heartbeatInit(monitor);
+  uartInit();
+  heartbeatInit();
 
   heartbeatStart();
-  while (1) {
-    os_eventq_run(os_eventq_dflt_get());
+}
+
+void loop() {
+  if (timerExpired(rxTimer)) {
+    monitor(EVENT_RX_TIMEOUT);
   }
 
-  return 0;
+ if (timerReset(hbTimer, 100)) {
+    monitor(EVENT_HEARTBEAT);
+  }
+
+  uartLoop();
 }
 
